@@ -1,16 +1,17 @@
 <template>
-  <BNavbar v-b-color-mode="'dark'" toggleable="lg" variant="dark-subtle">
-    <BNavbarBrand>Drapery Handmade</BNavbarBrand>
+  <BNavbar v-b-color-mode="'dark'" toggleable="lg" variant="dark-subtle" class="fixed-top">
+    <BNavbarBrand :to="{ name: 'index'}">Drapery Handmade</BNavbarBrand>
     <BNavbarToggle target="nav-collapse" />
     <BCollapse id="nav-collapse" is-nav>
       <BNavbarNav class="ms-auto mb-2 mb-lg-0">
         <BNavItem>
           關於我們
         </BNavItem>
-        <BNavItem>
-          <IMdiAccount/>會員
+        <BNavItem :to="{ name: 'login'}">
+          <IMdiAccount/>
+          登入
         </BNavItem>
-        <BNavItem>
+        <BNavItem :to="{ name: 'cart'}">
           <div class="position-relative d-inline-block">
             <IMdiCartVariant class="text-white" style="font-size: 1.5rem;" />
             <BBadge
@@ -32,5 +33,4 @@
 </script>
 
 <style scoped>
-
 </style>
