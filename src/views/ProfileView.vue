@@ -6,17 +6,11 @@
 </template>
 
 <script setup>
-import { onMounted, reactive} from "vue";
-import { getUserInfo } from "@/api/auth.js";
-const userInfo = reactive({
-  email: "",
-  name: "",
-})
+import { useAuthStore } from "@/stores/auth.js";
 
-onMounted(async() => {
-  const userInfoResponse = await getUserInfo();
-  Object.assign(userInfo, userInfoResponse);
-})
+const authStore = useAuthStore();
+const userInfo = authStore.user;
+
 </script>
 
 <style scoped>

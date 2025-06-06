@@ -69,26 +69,28 @@
 </template>
 
 <script setup>
-import {ref, reactive, computed} from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { BFormInput } from "bootstrap-vue-next";
-import {register as apiRegister} from "@/api/register.js";
+import { useAuthStore } from "@/stores/auth.js";
+
+const authStore = useAuthStore();
 
 const initFormData = reactive({
   email: "",
   password: "",
   name: "",
-})
-const canSubmit = computed(() => initFormData.email && initFormData.password && initFormData.name)
+});
+const canSubmit = computed(() => initFormData.email && initFormData.password && initFormData.name);
 const responseErrors = ref({});
 const responseErrorMessage = ref(null);
 const isSuccess = ref(false);
 
-const register = async () => {
+const register = async() => {
   try {
     responseErrorMessage.value = '';
     responseErrors.value = '';
 
-    await apiRegister({ ...initFormData })
+    await authStore.register({ ...initFormData })
     isSuccess.value = true;
     Object.assign(initFormData, {
       email: "",

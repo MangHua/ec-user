@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from "@/views/HomeView.vue"
 import ProfileView from "@/views/ProfileView.vue"
+import { useAuthStore } from "@/stores/auth.js";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,9 +12,12 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: '/home',
-      name: 'home',
+      path: '/user/profile',
+      name: 'user-profile',
       component: ProfileView,
+      meta: {
+        requiresAuth: true,
+      }
     },
     {
       path: '/about',
@@ -38,6 +42,9 @@ const router = createRouter({
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/login.vue'),
+      meta: {
+        onlyGuest: true,
+      }
     },
     {
       path: '/register',
@@ -46,6 +53,9 @@ const router = createRouter({
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/register.vue'),
+      meta: {
+        onlyGuest: true,
+      }
     },
     {
       path: '/cart',
@@ -54,8 +64,37 @@ const router = createRouter({
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/cart.vue'),
+      meta: {
+        requiresAuth: true,
+      }
     },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('../views/NotFoundView.vue'),
+    }
   ],
+});
+
+router.beforeEach(async(to, from, next) => {
+  const meta = to.meta;
+  const onlyGuest = meta?.onlyGuest || false;
+  const requireAuth = meta?.requiresAuth || false;
+  const authStore = useAuthStore();
+
+  if (authStore.isLogin) {
+    await authStore.initUser();
+  }
+
+  if (onlyGuest && authStore.isLogin) {
+    await router.push({ name: 'user-profile' });
+  }
+
+  if (requireAuth && !authStore.isLogin) {
+    await router.push({ name: 'login' });
+  }
+
+  next();
 })
 
 export default router

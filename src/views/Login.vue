@@ -54,11 +54,13 @@
 </template>
 
 <script setup>
-import {computed, reactive, ref} from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { BFormInput } from "bootstrap-vue-next";
-import { login as apiLogin } from "@/api/login.js";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth.js";
+
 const router = useRouter();
+const authStore = useAuthStore();
 
 const responseErrors = ref({});
 const responseErrorMessage = ref(null);
@@ -70,9 +72,8 @@ const canSubmit = computed(() => loginFormData.email && loginFormData.password)
 const login = async() => {
   responseErrorMessage.value = '';
   try {
-    const { token } = await apiLogin({ ...loginFormData })
-    localStorage.setItem("ec-token", token)
-    await router.push({ name: "home" })
+    await authStore.login(loginFormData);
+    await router.push({ name: "user-profile" });
   } catch (error) {
     responseErrors.value = error.errors;
     responseErrorMessage.value = error.isValidationError ? '' : error.message;
