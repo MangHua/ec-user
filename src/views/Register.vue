@@ -1,6 +1,12 @@
 <template>
   <div class="register">
-    <h1>註冊</h1>
+    <h2>註冊</h2>
+    <div v-if="responseErrorMessage" class="alert alert-danger">
+      {{ responseErrorMessage }}
+    </div>
+    <div v-if="isSuccess" class="alert alert-success">
+      註冊成功
+    </div>
     <BFormGroup
       id="input-group-1"
       label="電子郵件:"
@@ -9,7 +15,11 @@
       <BFormInput
         id="input-1"
         type="email"
+        v-model="initFormData.email"
       />
+      <div v-if="responseErrors?.email">
+        <span v-for="errorMsg in responseErrors.email" :key="errorMsg" class="error">{{ errorMsg }}</span>
+      </div>
     </BFormGroup>
     <BFormGroup
       id="input-group-2"
@@ -19,7 +29,11 @@
       <BFormInput
         id="input-2"
         type="password"
+        v-model="initFormData.password"
       />
+      <div v-if="responseErrors?.password">
+        <span v-for="errorMsg in responseErrors.password" :key="errorMsg" class="error">{{ errorMsg }}</span>
+      </div>
     </BFormGroup>
     <BFormGroup
       id="input-group-3"
@@ -29,31 +43,64 @@
       <BFormInput
         id="input-3"
         type="text"
+        v-model="initFormData.name"
       />
+      <div v-if="responseErrors?.name">
+        <span v-for="errorMsg in responseErrors.name" :key="errorMsg" class="error">{{ errorMsg }}</span>
+      </div>
     </BFormGroup>
     <BFormGroup
-      id="input-group-4"
-      label="電話:"
-      label-for="input-4"
+      class="mt-3 d-flex justify-content-between"
     >
-      <BFormInput
-        id="input-3"
-        type="telephone"
-      />
+      <router-link to="/login"
+        class="align-self-end"
+      >
+        已經有帳號？前往登入
+      </router-link>
+      <BButton
+        variant="outline-primary"
+        @click="register"
+        :disabled="!canSubmit"
+      >
+        確定註冊
+      </BButton>
     </BFormGroup>
-    <BButton
-      variant="outline-primary"
-      class="mt-4 float-end"
-    >
-      確定註冊
-    </BButton>
-
   </div>
 </template>
 
 <script setup>
+import {ref, reactive, computed} from 'vue';
+import { BFormInput } from "bootstrap-vue-next";
+import {register as apiRegister} from "@/api/register.js";
 
-import {BFormInput} from "bootstrap-vue-next";
+const initFormData = reactive({
+  email: "",
+  password: "",
+  name: "",
+})
+const canSubmit = computed(() => initFormData.email && initFormData.password && initFormData.name)
+const responseErrors = ref({});
+const responseErrorMessage = ref(null);
+const isSuccess = ref(false);
+
+const register = async () => {
+  try {
+    responseErrorMessage.value = '';
+    responseErrors.value = '';
+
+    await apiRegister({ ...initFormData })
+    isSuccess.value = true;
+    Object.assign(initFormData, {
+      email: "",
+      password: "",
+      name: "",
+    });
+  } catch (error) {
+    responseErrors.value = error.errors;
+    responseErrorMessage.value = error.isValidationError ? '' : error.message;
+  }
+}
+
 </script>
 
 <style scoped>
@@ -64,9 +111,7 @@ import {BFormInput} from "bootstrap-vue-next";
   border-style:outset;
   box-shadow: 5px 5px 5px darkgrey;
   padding: 40px;
-  height: 500px;
   width: 500px;
   border-radius: 20px;
-
 }
 </style>

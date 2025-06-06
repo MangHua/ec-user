@@ -13,7 +13,7 @@
 <script setup>
 
 const items = [
-  {商品: 40, 單價: 'Dickerson', 數量: 'Macdonald', 總金額: 'Macdonald'},
+  {age: '1', 商品: '素色棉布', 數量: '1', 尺寸:'半碼', 金額:'135'},
 
 ]
 </script>
