@@ -65,15 +65,15 @@ const authStore = useAuthStore();
 const responseErrors = ref({});
 const responseErrorMessage = ref(null);
 const loginFormData = reactive({
-  email: "",
-  password: "",
+  email: import.meta.env.VITE_APP_TEST_USER_ACCOUNT,
+  password: import.meta.env.VITE_APP_TEST_USER_PASSWORD,
 })
 const canSubmit = computed(() => loginFormData.email && loginFormData.password)
 const login = async() => {
   responseErrorMessage.value = '';
   try {
     await authStore.login(loginFormData);
-    await router.push({ name: "user-profile" });
+    await router.push({ name: "index" });
   } catch (error) {
     responseErrors.value = error.errors;
     responseErrorMessage.value = error.isValidationError ? '' : error.message;
