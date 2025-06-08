@@ -1,99 +1,269 @@
 <template>
-  <div class="row">
-    <div class="col-5 mx-5">
-      <BCarousel controls>
-        <BCarouselSlide img-src="https://down-tw.img.susercontent.com/file/485cb7a5efca239ee5cde15267fda2d4.webp"/>
-        <BCarouselSlide img-src="https://down-tw.img.susercontent.com/file/tw-11134207-7r98w-ltki9unelk7vd5.webp"/>
-        <BCarouselSlide img-src="https://down-tw.img.susercontent.com/file/tw-11134207-7r98o-ltki9unek5nfda.webp"/>
+  <div class="row justify-content-center product-details">
+    <div class="col-12 col-md-6">
+      <BCarousel
+        v-if="productInfo.images.length > 0"
+        controls
+      >
+        <BCarouselSlide
+          v-for="(image, index) in productInfo.images"
+          :key="index"
+          :img-src="image"
+        />
       </BCarousel>
 
       <div class="d-flex my-2">
-        <BCol>
-          <BImg thumbnail fluid src="https://down-tw.img.susercontent.com/file/485cb7a5efca239ee5cde15267fda2d4.webp" alt="Image 1"/>
-        </BCol>
-        <BCol>
-          <BImg thumbnail fluid src="https://down-tw.img.susercontent.com/file/tw-11134103-7quky-lk3ja58k237qbe.webp" alt="Image 1"/>
-        </BCol>
-        <BCol>
-          <BImg thumbnail fluid src="https://down-tw.img.susercontent.com/file/tw-11134207-7r98w-ltki9unelk7vd5.webp" alt="Image 1"/>
-        </BCol>
-        <BCol>
-          <BImg thumbnail fluid src="https://down-tw.img.susercontent.com/file/tw-11134207-7r98o-ltki9unek5nfda.webp" alt="Image 1"/>
+        <BCol
+          v-for="(image, index) in productInfo.images"
+          :key="index"
+        >
+          <BImg
+            thumbnail
+            fluid
+            :src="image"
+            :alt="productInfo.name"
+          />
         </BCol>
       </div>
     </div>
-    <div class="col-5">
-      <h2>素色棉布</h2>
-      <p>100％純天然純棉，可製作衣服、抱枕、圍裙、包包內裡、桌巾、被單等…</p>
-
-      <span style="display: block;">尺 寸：約30x140公分</span>
-      <span style="display: block;">單 位：尺</span>
-      <span style="display: block;">產 地：日本</span>
+    <div class="col-12 col-md-6 mt-4 mt-md-0 product-info ">
+      <h2>{{ productInfo.name }}</h2>
+      <p v-html="productInfo.description"></p>
 
       <div class="h3 ml-auto my-2" style="color: #FA8072">
         <small>NT$</small>
-        <strong id="product-price">135</strong>
+        <template v-if="SKU.price">
+          <strong id="product-price">
+            {{ productInfo.min_price }}
+          </strong>
+        </template>
+        <template v-else>
+          <strong id="product-price">
+            {{ productInfo.min_price }}
+          </strong>
+          ~
+          <strong id="product-price">
+            {{ productInfo.max_price }}
+          </strong>
+        </template>
       </div>
 
       <div class="row my-2">
-        <h4 class="col-md-2  heading">顏色</h4>
-        <div class="row col-md-10">
-          <BButton variant="outline-secondary" class="col-md-2 m-1">淺紫</BButton>
-          <BButton variant="outline-secondary" class="col-md-2 m-1">粉色</BButton>
-          <BButton variant="outline-secondary" class="col-md-2 m-1">白色</BButton>
-          <BButton variant="outline-secondary" class="col-md-2 m-1">藍色</BButton>
-          <BButton variant="outline-secondary" class="col-md-2 m-1">深藍</BButton>
-          <BButton variant="outline-secondary" class="col-md-2 m-1">黑色</BButton>
-          <BButton variant="outline-secondary" class="col-md-2 m-1">咖啡</BButton>
-        </div>
+        <template
+          v-for="attribute in productInfo.attributes"
+          :key="attribute.id"
+        >
+          <h4 class="col-4 my-2">
+            {{ attribute.name }}
+          </h4>
+          <div class="d-flex flex-wrap">
+            <BButton
+              v-for="attributeValue in attribute.values"
+              :key="attributeValue.id"
+              :variant="selectedAttributes[attribute.id] === attributeValue.id ? 'secondary' : 'outline-secondary'"
+              class="spec-btn"
+              @click="selectAttribute(attribute.id, attributeValue.id)"
+            >
+              {{ attributeValue.value }}
+            </BButton>
+          </div>
+        </template>
       </div>
 
-      <div class="row my-2">
-        <h4 class="col-md-2  heading">尺寸</h4>
-        <div class="row col-md-10">
-          <BFormSelect v-model="selected" :options="ex1Options" size="sm" class="m-1" />
+      <div class="my-4">
+        <h4 class="">數量</h4>
+        <BFormSpinbutton
+          id="sb-inline"
+          size="lg"
+          placeholder="0"
+          class="w-50"
+          :readonly="!SKU.stock"
+          :max="SKU.stock"
+          v-model="newCartItem.quantity"
+        />
+      </div>
+      <div class="alert-message-block mt-2">
+        <div v-if="responseErrorMessage" class="alert alert-danger">
+          {{ responseErrorMessage }}
+        </div>
+        <div v-if="isSuccess" class="alert alert-success">
+          加入購物車成功
         </div>
       </div>
-
-      <div class="row my-2">
-        <h4 class="col-md-2  heading">數量</h4>
-        <div class="row col-md-10">
-          <BFormSpinbutton id="sb-inline" inline placeholder="0"  class="m-1"/>
-        </div>
-      </div>
-
-      <div class="justify-content-start">
-        <BButton variant="primary" size="lg" class="button">
+      <div class="col-12 d-flex justify-content-sm-center justify-content-md-end footer-btn">
+        <BButton
+          variant="danger"
+          size="lg"
+          class="me-4 w-50"
+          @click="addToCart"
+          :disabled="!newCartItem.quantity > 0"
+        >
           <IMdiCartPlus/>
           加入購物車
         </BButton>
-        <BButton size="lg" class="mx-2 my-2 button">直接購買</BButton>
+        <BButton
+          variant="danger"
+          size="lg"
+          class="w-50"
+          @click="buyRightNow"
+          :disabled="!newCartItem.quantity > 0"
+        >
+          直接購買
+        </BButton>
       </div>
-
     </div>
   </div>
 </template>
 
 <script setup>
-import {ref} from 'vue'
+import { ref, onMounted, watch, reactive } from 'vue';
+import { useRoute } from "vue-router";
+import {
+  getProductById as apiGetProductById,
+  getSKUByAttributeValueIds as apiGetSKUByAttributeValueIds
+} from "@/api/product.js";
+import { BFormSpinbutton } from "bootstrap-vue-next";
+import { useCartStore } from "@/stores/cart.js";
+import { useRouter } from "vue-router";
 
-const ex1Options = [
-  {value: null, text: '半碼 約45x110cm'},
-  {value: 'a', text: '1碼 約90x110cm'}
-]
-const selected = ref(null)
+const router = useRouter();
+const route = useRoute();
+const responseErrors = ref({});
+const responseErrorMessage = ref(null);
+const isSuccess = ref(false);
+const cartStore = useCartStore();
+
+const productId = route.params?.id;
+const productInfo = ref({
+  id: productId,
+  name: null,
+  attributes: [],
+  min_price: null,
+  max_price: null,
+  stock: null,
+  image: null,
+  images: [],
+  description: null,
+});
+
+
+const defaultSKU = {
+  id: null,
+  code: null,
+  name: null,
+  price: null,
+  stock: null,
+};
+
+const SKU = ref({ ...defaultSKU });
+
+const initCartItem = {
+  sku_id: null,
+  quantity: null,
+  unit_price: null,
+};
+
+const newCartItem = reactive({ ...initCartItem });
+const selectedAttributes = reactive({})
+const selectAttribute = (attributeId, attributeValueId) => {
+  selectedAttributes[attributeId] = attributeValueId;
+}
+const clearSelectedAttributes = () => {
+  for (const key in selectedAttributes) {
+    // 確保只刪除自身的屬性，而不是原型鏈上的
+    if (Object.prototype.hasOwnProperty.call(selectedAttributes, key)) {
+      delete selectedAttributes[key];
+    }
+  }
+};
+watch(selectedAttributes, async(newValue) => {
+  responseErrorMessage.value = '';
+  responseErrors.value = '';
+  if (Object.keys(newValue).length < productInfo.value.attributes.length) {
+    return;
+  }
+
+  SKU.value = { ...defaultSKU };
+  Object.assign(newCartItem, { ...initCartItem });
+  try {
+    await apiGetSKUByAttributeValueIds(productInfo.value.id, newValue)
+      .then(response => {
+        SKU.value.id = response.id;
+        SKU.value.code = response.code;
+        SKU.value.name = response.name;
+        SKU.value.price = response.price;
+        SKU.value.stock = response.stock;
+
+        newCartItem.sku_id = response.id;
+        newCartItem.unit_price = response.price;
+      });
+  } catch (error) {
+    responseErrors.value = error.errors;
+    responseErrorMessage.value = error.isValidationError ? '' : error.message;
+  }
+});
+onMounted(async() => {
+  try {
+    const product = await apiGetProductById(productId);
+    productInfo.value.name = product.name;
+    productInfo.value.attributes = product.attributes;
+    productInfo.value.min_price = product.min_price;
+    productInfo.value.max_price = product.max_price;
+    productInfo.value.stock = product.stock;
+    productInfo.value.image = product.image;
+    productInfo.value.images = product.images;
+    productInfo.value.description = product.description;
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+const addToCart = async() => {
+  responseErrorMessage.value = '';
+  responseErrors.value = '';
+  isSuccess.value = false;
+  try {
+    if (!newCartItem.sku_id || !newCartItem.quantity || !newCartItem.unit_price) {
+      responseErrorMessage.value = '欲加入購物車的商品資訊有誤！';
+      return;
+    }
+    await cartStore.addToCart({ ...newCartItem });
+    isSuccess.value = true;
+    clearSelectedAttributes();
+    SKU.value = { ...defaultSKU };
+    Object.assign(newCartItem, { ...initCartItem });
+  } catch (error) {
+    responseErrors.value = error.errors;
+    responseErrorMessage.value = error.isValidationError ? '' : error.message;
+  }
+}
+
+const buyRightNow = async () => {
+  await addToCart()
+  await router.push({ name: 'cart' });
+}
+
 </script>
 
 <style scoped>
-.heading {
-  font-size: 16px;
-  font-weight:normal;
-  color: gray;
-  line-height:3;
+.product-info {
+  max-height: 664px;
+  overflow: auto;
+  margin-bottom: 16px;
 }
-.button {
-  color: 	#FFDAC8;
-  background-color: #AD5A5A;
-  border-color: transparent;
+
+.spec-btn {
+  margin: .15rem;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-wrap: nowrap;
+}
+
+.footer-btn {
+  max-height: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-wrap: nowrap;
 }
 </style>

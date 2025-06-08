@@ -7,20 +7,26 @@
 
   <h1 class="mt-3">商品列表</h1>
   <div class="row">
-    <div class="col-4 mt-3">
-      <BLink :to="{ name: 'merchandise'}">
+    <div
+      class="col-12 col-sm-6 col-md-4 mt-3 d-flex justify-content-center justify-content-md-start"
+      v-for="product in allProducts"
+      :key="product.id"
+    >
+      <BLink
+        :to="{ name: 'merchandise', params: { id: product.id }}"
+        :disabled="product.id !== 4"
+      >
         <BCard
-          title="素色棉布"
-          img-src="https://down-tw.img.susercontent.com/file/485cb7a5efca239ee5cde15267fda2d4.webp"
-          img-alt="Image"
+          :title="product.name"
+          :img-src="product.image"
+          :img-alt="product.name"
           img-top
           img-height="300px"
           tag="article"
           style="max-width: 20rem"
+          class="h-100"
         >
-          <BCardText>
-            可製作衣服、抱枕、圍裙、包包內裡、桌巾、被單等…
-          </BCardText>
+          <BCardText v-html="product.description" />
         </BCard>
       </BLink>
     </div>
@@ -30,7 +36,25 @@
 </template>
 
 <script setup>
+import { getAllProducts as apiGetAllProducts } from '@/api/product.js';
+import { onMounted, ref } from "vue";
 
+const allProducts = ref([]);
+onMounted(async () => {
+  const { data } = await apiGetAllProducts();
+  allProducts.value = data
+    .sort(currentProduct => currentProduct.id !== 4 ? 1 : -1)
+    .map(product => {
+      return {
+        id: product.id,
+        name: product.name,
+        image: product.image,
+        price: product.price,
+        stock: product.stock,
+        description: product.description,
+      }
+    });
+});
 
 </script>
 
@@ -44,5 +68,4 @@
 a {
   text-decoration: none;
 }
-
 </style>

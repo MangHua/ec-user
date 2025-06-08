@@ -37,7 +37,7 @@
                 class="position-absolute top-0 start-100 translate-middle"
                 style="font-size: .65rem;"
               >
-                0
+                {{ cartItems.length || 0 }}
               </BBadge>
             </div>
           </BNavItem>
@@ -62,15 +62,24 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth.js";
+import { useCartStore } from "@/stores/cart.js";
+import { storeToRefs } from "pinia";
 
 const authStore = useAuthStore();
+const cartStore = useCartStore();
+const { cartItems } = storeToRefs(cartStore);
+console.log('cartItemscartItemscartItems', cartItems)
 const user = authStore.user;
 const router = useRouter();
 const showLogoutModal = ref(false);
 const logoutErrorMessage = ref(null);
+
+onMounted(async() => {
+  await cartStore.initCart();
+});
 
 const logout = async() => {
   try {

@@ -8,9 +8,11 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    BAlert: typeof import('bootstrap-vue-next/components/BAlert')['BAlert']
     BBadge: typeof import('bootstrap-vue-next/components/BBadge')['BBadge']
     BButton: typeof import('bootstrap-vue-next/components/BButton')['BButton']
     BCard: typeof import('bootstrap-vue-next/components/BCard')['BCard']
+    BCardBody: typeof import('bootstrap-vue-next/components/BCard')['BCardBody']
     BCardText: typeof import('bootstrap-vue-next/components/BCard')['BCardText']
     BCarousel: typeof import('bootstrap-vue-next/components/BCarousel')['BCarousel']
     BCarouselSlide: typeof import('bootstrap-vue-next/components/BCarousel')['BCarouselSlide']
@@ -39,6 +41,7 @@ declare module 'vue' {
     IMdiCartVariant: typeof import('~icons/mdi/cart-variant')['default']
     IMdiLogin: typeof import('~icons/mdi/login')['default']
     IMdiLogout: typeof import('~icons/mdi/logout')['default']
+    IMdiTrash: typeof import('~icons/mdi/trash')['default']
     Navbar: typeof import('./src/components/Navbar.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
