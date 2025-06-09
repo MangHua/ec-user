@@ -36,8 +36,15 @@
         />
       </template>
 
-      <template #cell(sub_total)="data">
+      <template #cell(sub_total)="data" >
         {{ data.item.sub_total }}
+        <BButton
+          size="sm"
+          class="mx-3"
+          @click="cartdeleteCartById(data.item.id)"
+        >
+          刪除
+        </BButton>
       </template>
     </BTable>
     <div
@@ -76,6 +83,7 @@ const responseErrors = ref(null);
 const responseErrorMessage = ref(null);
 const isSuccess = ref(false);
 const cartStore = useCartStore();
+
 const fields = [
   {
     key: 'sku_name',
@@ -117,6 +125,7 @@ const orderInfo = ref({
 const { cartItems } = storeToRefs(cartStore);
 cartItems.value = cartItems.value.map((cartItem) => {
   return {
+    id: cartItem.id,
     sku_id: cartItem.sku_id,
     sku_name: cartItem.sku_name,
     image: cartItem.image,
@@ -159,6 +168,14 @@ const createOrder = async() => {
       order_time: order.order_time,
     });
     await cartStore.initCart();
+  } catch (error) {
+    responseErrors.value = error.errors;
+    responseErrorMessage.value = error.isValidationError ? '' : error.message;
+  }
+}
+const cartdeleteCartById = async(cartItemId) => {
+  try {
+    await cartStore.deleteCartById(cartItemId);
   } catch (error) {
     responseErrors.value = error.errors;
     responseErrorMessage.value = error.isValidationError ? '' : error.message;

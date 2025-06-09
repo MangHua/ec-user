@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { addToCart as apiAddToCart, getCartItems as apiGetCartItems, clearCart as apiClearCart } from '@/api/cart.js';
+import { addToCart as apiAddToCart, getCartItems as apiGetCartItems, clearCart as apiClearCart, deleteCartById as apideleteCartById } from '@/api/cart.js';
 
 export const useCartStore = defineStore('cart', () => {
   const cartItems = ref([]);
@@ -37,10 +37,20 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
+  const deleteCartById = async(cartItemId) => {
+    try {
+      await apideleteCartById(cartItemId);
+      cartItems.value = cartItems.value.filter(item => item.cart_item_id !== cartItemId);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
+
   return {
     initCart,
     addToCart,
     clearCart,
+    deleteCartById,
     cartItems,
   }
 });

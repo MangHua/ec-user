@@ -20,6 +20,7 @@ declare module 'vue' {
     BCollapse: typeof import('bootstrap-vue-next/components/BCollapse')['BCollapse']
     BFormGroup: typeof import('bootstrap-vue-next/components/BFormGroup')['BFormGroup']
     BFormInput: typeof import('bootstrap-vue-next/components/BFormInput')['BFormInput']
+    BFormRadio: typeof import('bootstrap-vue-next/components/BFormRadio')['BFormRadio']
     BFormSelect: typeof import('bootstrap-vue-next/components/BFormSelect')['BFormSelect']
     BFormSpinbutton: typeof import('bootstrap-vue-next/components/BFormSpinbutton')['BFormSpinbutton']
     BImg: typeof import('bootstrap-vue-next/components/BImg')['BImg']
